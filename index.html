@@ -25,13 +25,12 @@
                 <header class="py-10">
                     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <h1 class="text-3xl text-center font-bold tracking-tight
-                            text-white">Loom.com Transcript Markdown Converter</h1>
+                            text-white">Loom Transcript Markdown Converter</h1>
                     </div>
                 </header>
             </div>
 
             <main class="-mt-32">
-                <script src="converter.js"></script>
                 <div class="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
                     <!-- Replace with your content -->
                     <div class="rounded-lg bg-white px-5 py-6 shadow sm:px-6">
@@ -39,11 +38,10 @@
                             border-gray-200">
                             <div class="flex">
                                 <div class="flex-1">
-                                    <textarea id="input">Your loom.com
-                                        transcript here..</textarea>
+                                    <textarea id="input">Transcript here...</textarea>
                                 </div>
                                 <div class="flex-1">
-                                    <textarea id="output"></textarea>
+                                    <textarea id="output">#Generated Markdown</textarea>
                                 </div>
                             </div>
                         </div>
@@ -52,5 +50,45 @@
                 </div>
             </main>
         </div>
+        <script>
+            const input = CodeMirror.fromTextArea(document.getElementById("input"), {
+    theme: "default",
+    lineWrapping: true,
+    lineNumbers: true,
+  });
+  const output = CodeMirror.fromTextArea(document.getElementById("output"), {
+    theme: "dracula",
+    highlightFormatting: true,
+    lineWrapping: true,
+    lineNumbers: true,
+    mode: 'markdown',
+    readOnly: true
+  });
+
+input.on("change", (cm) => {
+let lines = cm.getValue().split("\n");
+let markdown = [];
+
+lines.forEach((line) => {
+let match = line.match(/(\d+:\d+)\s*(.*)/);
+if (!match) {
+  markdown.push(line);
+  return;
+}
+
+let timestamp = match[1];
+let sentence = match[2];
+
+let minutes = parseInt(timestamp.split(":")[0]);
+let seconds = parseInt(timestamp.split(":")[1]);
+
+let hyperlink = minutes * 60 + seconds;
+
+markdown.push(`[${timestamp}](#t=${hyperlink}) ${sentence}`);
+});
+
+output.setValue(markdown.join("\n\n"));
+});
+        </script>
     </body>
 </html>
